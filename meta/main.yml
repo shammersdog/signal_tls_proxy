@@ -1,5 +1,7 @@
 galaxy_info:
-  author: Shammersdog 
+  author: shammersdog
+  role_name: signal_tls_proxy
+  namespace: shammersdog
   description: An all-in-one role that deploys Signal TLS Proxy onto a fresh Debian-based system.
 
   # If the issue tracker for your role is not on github, uncomment the
@@ -15,7 +17,7 @@ galaxy_info:
   # - CC-BY-4.0
   license: MIT
 
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
 
   # If this a Container Enabled role, provide the minimum Ansible Container version.
   # min_ansible_container_version:

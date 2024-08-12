@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Test shamemrsdog.signal_tls_proxy
+  hosts: localhost
   remote_user: root
   vars:
     domain: proxy.example.com

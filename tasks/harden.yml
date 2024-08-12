@@ -24,7 +24,7 @@
     line: "PasswordAuthentication no"
   notify: Restart SSH service
   when:
-    - not allow_pass 
+    - not allow_pass
 
 - name: Install and enable unattended upgrades
   ansible.builtin.apt:
