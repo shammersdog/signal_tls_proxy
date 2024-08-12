@@ -1,0 +1,97 @@
+---
+- name: Preflight check for Docker runs
+  block:
+    - name: Check for docker-compose
+      ansible.builtin.command: command -v docker-compose
+      changed_when: false
+      failed_when: false
+      register: old_cmd
+
+    - name: Check for newer docker
+      ansible.builtin.command: docker compose version
+      changed_when: false
+      failed_when: false
+      register: new_cmd
+
+    - name: Fail if docker compose commands are missing
+      ansible.builtin.fail:
+        msg: "Docker isn't found. Is it installed and is it in your PATH?"
+      when:
+        - new_cmd.rc != 0
+        - old_cmd.rc != 0
+
+    - name: Set command fact for Docker Compose
+      ansible.builtin.set_fact:
+        docker_cmd: "{{ 'docker-compose' if old_cmd.rc == 0 else 'docker compose' }}"
+
+    - name: Check if appropriate vars are set
+      ansible.builtin.fail:
+        msg: "Needed vars aren't set. Check your playbook or vars yml files and try again."
+      when:
+        - not domain
+        - not git_dir
+
+- name: "Ensure exists: {{ git_dir }}"
+  ansible.builtin.file:
+    path: "{{ git_dir }}"
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+- name: Clone git repo
+  ansible.builtin.git:
+    repo: https://github.com/signalapp/Signal-TLS-Proxy.git
+    dest: "{{ git_dir }}"
+    single_branch: true
+    version: main
+    update: "{{ 'false' if update_proxy is not defined or update_proxy is false else 'true' }}"
+  become_user: root
+  become: true
+
+- name: "Check if certs already exist"
+  ansible.builtin.stat:
+    path: "{{ git_dir }}/data/certbot/conf/live/{{ domain }}/"
+  changed_when: false
+  register: certs
+
+- name: Initialize TLS certificate
+  when: not certs.stat.exists
+  block:
+    - name: Check for domain name
+      ansible.builtin.fail:
+        msg: "You must set the domain variable to continue."
+      when: not domain
+      become_user: root
+      become: true
+
+    - name: Copy init-certifiate.sh
+      ansible.builtin.copy:
+        src: "{{ git_dir }}/init-certificate.sh"
+        dest: "{{ git_dir }}/init-certificate-mod.sh"
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: true
+
+    - name: Mod init-cert to be non-interactive (hack hack)
+      ansible.builtin.lineinfile:
+        path: "{{ git_dir }}/init-certificate-mod.sh"
+        regexp: '^read -p "Enter'
+        line: 'domains=$1'
+
+    - name: Run init-certificate-mod.sh
+      ansible.builtin.command:
+        cmd: "bash ./init-certificate-mod.sh \"{{ domain }}\""
+        chdir: "{{ git_dir }}"
+      changed_when: false
+      become_user: root
+      become: true
+
+- name: Detach Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cmd }} up -d"
+    chdir: "{{ git_dir }}"
+  changed_when: false
+  become_user: root
+  become: true

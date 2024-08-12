@@ -1,0 +1,4 @@
+---
+git_dir: /opt/proxy
+allow_pass: false
+update_proxy: false

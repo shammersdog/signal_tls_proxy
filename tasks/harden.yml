@@ -1,0 +1,41 @@
+---
+- name: Install fail2ban for SSH config
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+
+- name: Enable SSH jail for fail2ban
+  ansible.builtin.lineinfile:
+    path: /etc/fail2ban/jail.d/defaults-debian.conf
+    regexp: "^[sshd]"
+    insertafter: "^[sshd]"
+    line: "backend = systemd"
+
+- name: Start and enable fail2ban service
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: started
+    enabled: true
+
+- name: Disable password SSH login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^PasswordAuthentication"
+    line: "PasswordAuthentication no"
+  notify: Restart SSH service
+  when:
+    - not allow_pass 
+
+- name: Install and enable unattended upgrades
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - unattended-upgrades
+    - apt-listchanges
+
+- name: Enable and start unattended upgrades service
+  ansible.builtin.systemd:
+    name: unattended-upgrades
+    state: started
+    enabled: true

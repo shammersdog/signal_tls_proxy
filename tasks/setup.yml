@@ -1,0 +1,52 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install prereq packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - git
+    - gnupg2
+    - software-properties-common
+
+- name: Some tools for troubleshooting
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - htop
+    - iftop
+    - net-tools
+    - tcpdump
+
+- name: Grab Docker apt repo GPG key and install repo
+  block:
+    - name: Docker-CE GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker-ce.asc
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Docker-CE Apt Repo Install
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ architecture }} signed-by=/etc/apt/keyrings/docker-ce.asc] \
+               https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+
+- name: Install Docker-CE
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop:
+    - docker-ce
+    - docker-ce-cli

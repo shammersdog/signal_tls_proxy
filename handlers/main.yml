@@ -1,0 +1,10 @@
+---
+- name: Restart SSH service
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted
+
+- name: Restart Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted

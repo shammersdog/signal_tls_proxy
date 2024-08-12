@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  remote_user: root
+  vars:
+    domain: proxy.example.com
+    git_dir: /opt/proxy
+  roles:
+    - signal_tls_proxy

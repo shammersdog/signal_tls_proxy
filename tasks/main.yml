@@ -1,0 +1,18 @@
+---
+- name: Get architecture
+  ansible.builtin.command: dpkg --print-architecture
+  changed_when: false
+  register: archi
+
+- name: Set deb architecture
+  ansible.builtin.set_fact:
+    architecture: "{{ archi.stdout }}"
+
+- name: Setup environment
+  ansible.builtin.import_tasks: setup.yml
+
+- name: Hardening
+  ansible.builtin.import_tasks: harden.yml
+
+- name: Proxy kickoff
+  ansible.builtin.import_tasks: proxy.yml
