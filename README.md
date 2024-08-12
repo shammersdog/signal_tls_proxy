@@ -1,7 +1,7 @@
-Role Name
-=========
+Signal TLS Proxy Ansible Role
+=============================
 
-An all-in-one role designed to deploy Signal's TLS Proxy to circumvent government censorship. Installs varius utilities for troubleshooting, Docker-CE from official Docker repositories, fail2ban for SSH, disables password SSH login, and creates and starts the TLS Proxy automatically given your domain name.
+An all-in-one role designed to deploy [Signal's TLS Proxy](https://github.com/signalapp/Signal-TLS-Proxy) to circumvent government censorship. Installs varius utilities for troubleshooting, Docker-CE from official Docker repositories, fail2ban for SSH, disables password SSH login, and creates and starts the TLS Proxy automatically given your domain name.
 
 Requirements
 ------------
@@ -16,7 +16,13 @@ Requirements
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable       | Purpose                                                            | Default      |
+|----------------|--------------------------------------------------------------------|--------------|
+| `git_dir`      | Where Ansible will clone the [official Signal TLS proxy repo to.   | `/opt/proxy` |
+| `domain`       | Your FQDN that you want to launch a proxy using.                   |              |
+| `allow_pass`   | Whether or not to allow password login via SSH.                    | `false`      |
+| `update_proxy` | Force pulling from the Git repo listed above. (currently untested) | `false`      |
+
 
 Example Playbook
 ----------------
@@ -33,4 +39,4 @@ MIT
 Author Information
 ------------------
 
-Shammersdog - [[https://shamme.rs]] - [[sham@huskypa.ws]]
+Shammersdog - https://shamme.rs - sham@huskypa.ws
